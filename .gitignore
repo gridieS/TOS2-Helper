@@ -1,0 +1,5 @@
+*.swps
+*.swo
+*.swn
+*.swm
+.env
