@@ -1,6 +1,5 @@
-*.swps
+*.swp
 *.swo
 *.swn
 *.swm
-.env
 todo
