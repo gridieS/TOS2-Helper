@@ -15,6 +15,7 @@ TERMINAL_POSITION = [os.environ["TERMINAL_POSITION_X"],os.environ["TERMINAL_POSI
 vote1_locations_dict = {}
 vote2_locations_dict = {}
 button_dict = {}
+notepad_hidden: bool= False
 MouseController = pynput.mouse.Controller
 
 class WindowInfo:
@@ -54,7 +55,13 @@ class WindowInfo:
         subprocess.run(split(f"wmctrl -ir {self.hex_value} -e 0,{position_x},{position_y},{width},{height}"))
     def soft_close_window(self) -> None:
         subprocess.run(split(f"wmctrl -ic {self.hex_value}"))
-        
+
+    def toggle_hidden(self, toggle:bool) -> None:
+        keyword = "add"
+        if toggle == False:
+            keyword = "remove"
+        subprocess.run(split(f"wmctrl -ir {self.hex_value} -b {keyword},below"))
+
     def toggle_always_on_top(self, toggle:bool) -> None:
         keyword = "add"
         if toggle == False:
@@ -144,8 +151,10 @@ def stop_program():
     exit()
 
 def open_tos_notepad():
+    global notepad_hidden
     subprocess.run(split("cp assets/tos_template.txt assets/temp_tos.txt"))
     subprocess.run(split("gnome-terminal -e 'vim assets/temp_tos.txt'"))
+    notepad_hidden = False
 
 def modify_notepad_window(current_windows_infos: list[WindowInfo]):
     for WindowInstance in current_windows_infos:
@@ -159,6 +168,13 @@ def close_notepad(current_windows_infos: list[WindowInfo]):
         if WindowInstance.window_name == TOS_NOTEPAD_WINDOW_NAME:
             WindowInstance.soft_close_window() 
 
+def toggle_notepad_minimized():
+    global notepad_hidden
+    current_windows_infos = get_current_windows_infos()
+    for WindowInstance in current_windows_infos:
+        if WindowInstance.window_name == TOS_NOTEPAD_WINDOW_NAME:
+            WindowInstance.toggle_hidden(not notepad_hidden)
+            notepad_hidden = not notepad_hidden
 
 def restart_notepad():
     current_windows_infos = get_current_windows_infos()
@@ -173,6 +189,7 @@ word_to_function = {
     os.environ["RESTART_PROGRAM_PREFIX"]: {"func": restart_notepad,"args": []},
     os.environ["GUILTY_PREFIX"]: {"func": decide_verdict_tos,"args": [True]},
     os.environ["INNOCENT_PREFIX"]: {"func": decide_verdict_tos,"args": [False]},
+    os.environ["TOGGLE_MINIMIZED"]: {"func": toggle_notepad_minimized,"args": []}
 }
 
 for i in range(1,TOS_TOWN_MEMBERS+1): #keep this
