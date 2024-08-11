@@ -49,7 +49,7 @@ Install requirements
 ```
 Then, to run the program:
 ```bash
-  ./quickstart.sh
+  ./quick_start.sh
 ```
 # All Commands
 
