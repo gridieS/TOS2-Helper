@@ -1,16 +1,22 @@
 import subprocess
+import os
 import time
 from shlex import split
 from sys import exit
 import pynput
+from dotenv import load_dotenv
+
+load_dotenv("customizations.env")
 
 TOS_TOWN_MEMBERS = 15
 TOS_NOTEPAD_WINDOW_NAME = "TOS-Notepad"
+ACTION_STRING = os.environ["ACTION_STRING"]
+TERMINAL_POSITION = [os.environ["TERMINAL_POSITION_X"],os.environ["TERMINAL_POSITION_Y"],os.environ["TERMINAL_WIDTH"],os.environ["TERMINAL_HEIGHT"]]
 vote1_locations_dict = {}
 vote2_locations_dict = {}
 button_dict = {}
-best_terminal_position = [850 , 710, 278, 411]
 MouseController = pynput.mouse.Controller
+
 class WindowInfo:
     index_to_attr_name = {
         "hex_value":0,
@@ -145,7 +151,7 @@ def modify_notepad_window(current_windows_infos: list[WindowInfo]):
     for WindowInstance in current_windows_infos:
         if WindowInstance.window_name == "Terminal":
             WindowInstance.change_window_name(TOS_NOTEPAD_WINDOW_NAME)
-            WindowInstance.change_window_dimensions(*best_terminal_position)
+            WindowInstance.change_window_dimensions(*TERMINAL_POSITION)
             WindowInstance.toggle_always_on_top(True)
 
 def close_notepad(current_windows_infos: list[WindowInfo]):
@@ -163,23 +169,22 @@ def restart_notepad():
     modify_notepad_window(current_windows_infos)
 
 word_to_function = {
-    "stop program": {"func": stop_program,"args": []},
-    "restart": {"func": restart_notepad,"args": []},
-    "guilty": {"func": decide_verdict_tos,"args": [True]},
-    "inno": {"func": decide_verdict_tos,"args": [False]},
-    "innocent": {"func": decide_verdict_tos,"args": [False]},
+    os.environ["STOP_PROGRAM_PREFIX"]: {"func": stop_program,"args": []},
+    os.environ["RESTART_PROGRAM_PREFIX"]: {"func": restart_notepad,"args": []},
+    os.environ["GUILTY_PREFIX"]: {"func": decide_verdict_tos,"args": [True]},
+    os.environ["INNOCENT_PREFIX"]: {"func": decide_verdict_tos,"args": [False]},
 }
 
 for i in range(1,TOS_TOWN_MEMBERS+1): #keep this
-    word_to_function[f"vote1 {i}"] = {"func": vote1_tos,"args": [i]} 
-    word_to_function[f"vote2 {i}"] = {"func": vote2_tos,"args": [i]}  
+    word_to_function[f"{os.environ["VOTE1_PREFIX"]}{i}"] = {"func": vote1_tos,"args": [i]} 
+    word_to_function[f"{os.environ["VOTE2_PREFIX"]}{i}"] = {"func": vote2_tos,"args": [i]}  
 
 word_cached = ""
 MAX_WORD_CACHED_LENGTH = 15
 def _pynput_on_press(key):
     global word_cached
-    try: 
-        if key == pynput.keyboard.KeyCode.from_char("`"):
+    try:
+        if key == pynput.keyboard.KeyCode.from_char(ACTION_STRING):
             for func_word in list(word_to_function.keys()):
                 if func_word in word_cached[-1*len(func_word):]:
                     print(f"Triggered event: {func_word}")
@@ -188,7 +193,7 @@ def _pynput_on_press(key):
                         pynput.keyboard.Controller.release(pynput.keyboard.Controller(),pynput.keyboard.Key.backspace)
                     func_dict = word_to_function[func_word]
                     func_dict["func"](*func_dict["args"])
-        elif key == pynput.keyboard.Key.backspace and len(word_cached) > 0:
+        if key == pynput.keyboard.Key.backspace and len(word_cached) > 0:
             word_cached = word_cached[0:-1]
         elif key == pynput.keyboard.Key.space:
             word_cached += " "
