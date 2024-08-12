@@ -168,13 +168,18 @@ def close_notepad(current_windows_infos: list[WindowInfo]):
         if WindowInstance.window_name == TOS_NOTEPAD_WINDOW_NAME:
             WindowInstance.soft_close_window() 
 
-def toggle_notepad_minimized():
+def toggle_notepad_minimized(toggle: bool = None):
     global notepad_hidden
     current_windows_infos = get_current_windows_infos()
     for WindowInstance in current_windows_infos:
         if WindowInstance.window_name == TOS_NOTEPAD_WINDOW_NAME:
-            WindowInstance.toggle_hidden(not notepad_hidden)
-            notepad_hidden = not notepad_hidden
+            if toggle == None:
+                WindowInstance.toggle_hidden(not notepad_hidden)
+                notepad_hidden = not notepad_hidden
+            else:
+                WindowInstance.toggle_hidden(toggle)
+                notepad_hidden = toggle
+
 
 def restart_notepad():
     current_windows_infos = get_current_windows_infos()
@@ -189,7 +194,9 @@ word_to_function = {
     os.environ["RESTART_PROGRAM_PREFIX"]: {"func": restart_notepad,"args": []},
     os.environ["GUILTY_PREFIX"]: {"func": decide_verdict_tos,"args": [True]},
     os.environ["INNOCENT_PREFIX"]: {"func": decide_verdict_tos,"args": [False]},
-    os.environ["TOGGLE_MINIMIZED"]: {"func": toggle_notepad_minimized,"args": []}
+    os.environ["TOGGLE_MINIMIZED"]: {"func": toggle_notepad_minimized,"args": []},
+    os.environ["MINIMIZE"]: {"func": toggle_notepad_minimized,"args": [True]},
+    os.environ["UNMINIMIZE"]: {"func": toggle_notepad_minimized,"args": [False]}
 }
 
 for i in range(1,TOS_TOWN_MEMBERS+1): #keep this
