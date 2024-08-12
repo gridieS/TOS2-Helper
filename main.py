@@ -168,7 +168,7 @@ def close_notepad(current_windows_infos: list[WindowInfo]):
         if WindowInstance.window_name == TOS_NOTEPAD_WINDOW_NAME:
             WindowInstance.soft_close_window() 
 
-def toggle_notepad_minimized(toggle: bool = None):
+def toggle_notepad_minimized(toggle: bool | None = None):
     global notepad_hidden
     current_windows_infos = get_current_windows_infos()
     for WindowInstance in current_windows_infos:
