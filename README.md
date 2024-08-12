@@ -6,16 +6,16 @@ A Town of Salem 2 helper, including a Vim notepad and some custom commands (such
 
 # Requirements
 
-Vim, Can be installed with your distro's package manger, for example:
+Vim and gnome-terminal, Can be installed with your distro's package manger, for example:
 
 For debian users:
 ```bash
-  sudo apt install vim
+  sudo apt install vim gnome-terminal
 ```
 
 Or for fedora/red hat users:
 ```bash
-  sudo dnf install vim
+  sudo dnf install vim gnome-terminal
 ```
 
 [Python3](https://www.python.org/downloads/) 
