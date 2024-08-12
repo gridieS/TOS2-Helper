@@ -24,10 +24,6 @@ Or for fedora/red hat users:
 ```bash
   python3 -m ensurepip
 ```
-[Pipenv](https://pypi.org/project/pipenv/)  Can be installed with:
-```bash
-  python3 -m pip install pipenv
-```
 
 # Installing and running (bash)
 
