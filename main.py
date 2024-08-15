@@ -5,6 +5,7 @@ from shlex import split
 from sys import exit
 import pynput
 from dotenv import load_dotenv
+from class_helpers import *
 
 load_dotenv("customizations.env")
 
@@ -18,62 +19,6 @@ button_dict = {}
 notepad_hidden: bool= False
 MouseController = pynput.mouse.Controller
 
-class WindowInfo:
-    index_to_attr_name = {
-        "hex_value":0,
-        "gravity":1,
-        "position_x":2,
-        "position_y": 3,
-        "width":4,
-        "height":5, 
-        "device_name":6,
-        "window_name":7
-    } 
-    def __init__(self,unreadableInfo: str):
-        split_info = [attr for attr in unreadableInfo.split(" ") if attr != " " and attr != ""]
-        for attr_name,attr_index in WindowInfo.index_to_attr_name.items():
-            self.__setattr__(attr_name,split_info[attr_index])
-
-        self.width = int(self.width)
-        self.height = int(self.height)
-        self.position_x = int(self.position_x)
-        self.position_y = int(self.position_y)
-
-    def change_window_name(self,new_name: str):
-        subprocess.run(split(f"wmctrl -ir {self.hex_value} -N {new_name}"))
-
-    def change_window_dimensions(self,position_x = None,position_y = None,width = None,height = None) -> None:
-        if width == None:
-            width = self.width
-        if height == None:
-            height = self.height
-        if position_x == None:
-            position_x = self.position_x
-        if position_y == None:
-            position_y = self.position_y
-
-        subprocess.run(split(f"wmctrl -ir {self.hex_value} -e 0,{position_x},{position_y},{width},{height}"))
-    def soft_close_window(self) -> None:
-        subprocess.run(split(f"wmctrl -ic {self.hex_value}"))
-
-    def toggle_hidden(self, toggle:bool) -> None:
-        keyword = "add"
-        if toggle == False:
-            keyword = "remove"
-        subprocess.run(split(f"wmctrl -ir {self.hex_value} -b {keyword},below"))
-
-    def toggle_always_on_top(self, toggle:bool) -> None:
-        keyword = "add"
-        if toggle == False:
-            keyword = "remove"
-            
-        subprocess.run(split(f"wmctrl -ir {self.hex_value} -b {keyword},above"))
-
-    def __str__(self) -> str:
-        final_string = ""
-        for attr_name,attr_value in self.__dict__.items():
-            final_string += f"{attr_name}: {attr_value}, "
-        return final_string
 
 def get_current_windows_infos() -> list[WindowInfo]:
     command_stdout = subprocess.run(["wmctrl", "-lG"],capture_output=True)
@@ -89,26 +34,18 @@ def decide_tos_vote_positions(current_windows_infos):
     for windowInfo in current_windows_infos:
         if "Town" in windowInfo.window_name:
             result = True
-            ending_y_position = windowInfo.height - (windowInfo.height/27)+windowInfo.position_y
-            vote1_x_position = windowInfo.width - (windowInfo.width/33.1)+windowInfo.position_x
-            vote2_x_position = vote1_x_position-(windowInfo.width/38.4)
+            ending_y_position = (windowInfo.height/1.038) + windowInfo.position_y
+            vote1_x_position = (windowInfo.width/1.031)+windowInfo.position_x
+            vote2_x_position = (windowInfo.width/1.059)
             y_margin_between_votes = windowInfo.height/33.75
             for i in range(TOS_TOWN_MEMBERS,0,-1):
                 vote1_locations_dict[i] = (vote1_x_position,ending_y_position-((TOS_TOWN_MEMBERS-i)*y_margin_between_votes))
                 vote2_locations_dict[i] = (vote2_x_position,ending_y_position-((TOS_TOWN_MEMBERS-i)*y_margin_between_votes))
-            members_buttons_x_position = windowInfo.width -(windowInfo.width/4)+windowInfo.position_x
-            show_alive_y_position = windowInfo.height -(windowInfo.height/2.4)+windowInfo.position_y
-            show_all_y_position = windowInfo.height -(windowInfo.height/6.75)+windowInfo.position_y
-            button_dict["show_all"] = (members_buttons_x_position,show_all_y_position)
-            button_dict["show_alive"] = (members_buttons_x_position,show_alive_y_position)
-            decision_buttons_y_position = windowInfo.height - (windowInfo.height/2.9) + windowInfo.position_y
-            inno_x_position = windowInfo.width -(windowInfo.width/2.5)+windowInfo.position_x
-            guilty_x_position = windowInfo.width -(windowInfo.width/1.65)+windowInfo.position_x
-            button_dict["inno"] = (inno_x_position,decision_buttons_y_position)
-            button_dict["guilty"] = (guilty_x_position,decision_buttons_y_position)
-            ability_button_x = (windowInfo.width/1.17)+windowInfo.position_x
-            ability_button_y = (windowInfo.height/4.86) + windowInfo.position_y
-            button_dict["ability"] = (ability_button_x,ability_button_y)
+            button_dict["show_all"] = ScreenCoordinates(windowInfo,1.33,1.17)
+            button_dict["show_alive"] = ScreenCoordinates(windowInfo,1.33,1.69)
+            button_dict["inno"] = ScreenCoordinates(windowInfo,1.66,1.52)
+            button_dict["guilty"] = ScreenCoordinates(windowInfo,2.53,1.52) 
+            button_dict["ability"] = ScreenCoordinates(windowInfo,1.17,4.86) 
 
     if result == False:
         print("Could not find TOS2 window.")
@@ -118,17 +55,17 @@ def move_mouse_to(posx:float | int,posy:float | int):
     MouseController.move(MouseController(),posx,posy)
 
 def show_all_members():
-    move_mouse_to(int(button_dict["show_all"][0]),int(button_dict["show_all"][1]))
+    move_mouse_to(*button_dict["show_all"].position)
     MouseController.click(MouseController(),pynput.mouse.Button.left)
 
 def show_alive_members():
-    move_mouse_to(int(button_dict["show_alive"][0]),int(button_dict["show_alive"][1]))
+    move_mouse_to(*button_dict["show_alive"].position)
     MouseController.click(MouseController(),pynput.mouse.Button.left)
 
 def vote1_tos(num):
     show_all_members()
     time.sleep(DELAY_TIME/3)
-    move_mouse_to(int(vote1_locations_dict[num][0]),int(vote1_locations_dict[num][1]))
+    move_mouse_to(*vote1_locations_dict[num])
     MouseController.click(MouseController(),pynput.mouse.Button.left)
     time.sleep(DELAY_TIME/3)
     show_alive_members()
@@ -136,20 +73,20 @@ def vote1_tos(num):
 def vote2_tos(num):
     show_all_members()
     time.sleep(DELAY_TIME/3)
-    move_mouse_to(int(vote2_locations_dict[num][0]),int(vote2_locations_dict[num][1]))
+    move_mouse_to(*vote2_locations_dict[num])
     MouseController.click(MouseController(),pynput.mouse.Button.left)
     time.sleep(DELAY_TIME/3)
     show_alive_members()
 
 def decide_verdict_tos(verdict: bool):
     if verdict == True:
-        move_mouse_to(button_dict["guilty"][0],button_dict["guilty"][1])
+        move_mouse_to(*button_dict["guilty"].position)
     elif verdict == False:
-        move_mouse_to(button_dict["inno"][0],button_dict["inno"][1])
+        move_mouse_to(*button_dict["inno"].position)
     MouseController.click(MouseController(),pynput.mouse.Button.left)
 
 def click_ability():
-    move_mouse_to(*button_dict["ability"])
+    move_mouse_to(*button_dict["ability"].position)
     MouseController.click(MouseController(),pynput.mouse.Button.left)
 
 def stop_program():
