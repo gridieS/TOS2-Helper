@@ -106,6 +106,9 @@ def decide_tos_vote_positions(current_windows_infos):
             guilty_x_position = windowInfo.width -(windowInfo.width/1.65)+windowInfo.position_x
             button_dict["inno"] = (inno_x_position,decision_buttons_y_position)
             button_dict["guilty"] = (guilty_x_position,decision_buttons_y_position)
+            ability_button_x = (windowInfo.width/1.17)+windowInfo.position_x
+            ability_button_y = (windowInfo.height/4.86) + windowInfo.position_y
+            button_dict["ability"] = (ability_button_x,ability_button_y)
 
     if result == False:
         print("Could not find TOS2 window.")
@@ -143,6 +146,10 @@ def decide_verdict_tos(verdict: bool):
         move_mouse_to(button_dict["guilty"][0],button_dict["guilty"][1])
     elif verdict == False:
         move_mouse_to(button_dict["inno"][0],button_dict["inno"][1])
+    MouseController.click(MouseController(),pynput.mouse.Button.left)
+
+def click_ability():
+    move_mouse_to(*button_dict["ability"])
     MouseController.click(MouseController(),pynput.mouse.Button.left)
 
 def stop_program():
@@ -196,7 +203,8 @@ word_to_function = {
     os.environ["INNOCENT_PREFIX"]: {"func": decide_verdict_tos,"args": [False]},
     os.environ["TOGGLE_MINIMIZED"]: {"func": toggle_notepad_minimized,"args": []},
     os.environ["MINIMIZE"]: {"func": toggle_notepad_minimized,"args": [True]},
-    os.environ["UNMINIMIZE"]: {"func": toggle_notepad_minimized,"args": [False]}
+    os.environ["UNMINIMIZE"]: {"func": toggle_notepad_minimized,"args": [False]},
+    os.environ["ABILITY"]: {"func": click_ability,"args": []}
 }
 
 for i in range(1,TOS_TOWN_MEMBERS+1): #keep this
