@@ -50,9 +50,9 @@ def decide_tos_vote_positions(current_windows_infos):
     if result == False:
         print("Could not find TOS2 window.")
 
-def move_mouse_to(posx:float | int,posy:float | int):
+def move_mouse_to(pos_x:float | int,pos_y:float | int):
     MouseController.move(MouseController(),-3000,-3000)
-    MouseController.move(MouseController(),posx,posy)
+    MouseController.move(MouseController(),pos_x,pos_y)
 
 def show_all_members():
     move_mouse_to(*button_dict["show_all"].position)
