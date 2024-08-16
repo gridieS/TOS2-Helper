@@ -19,14 +19,11 @@ button_dict = {}
 notepad_hidden: bool= False
 MouseController = pynput.mouse.Controller
 
-
 def get_current_windows_infos() -> list[WindowInfo]:
     command_stdout = subprocess.run(["wmctrl", "-lG"],capture_output=True)
     return [WindowInfo(unreadableWindowInfo) for unreadableWindowInfo in str(command_stdout.stdout).split(r"\n") if len(unreadableWindowInfo) >= 8]
 
-
 def decide_tos_vote_positions(current_windows_infos):
-    # 58 38.4,32 40
     global vote1_locations_dict
     global vote2_locations_dict
     global button_dict

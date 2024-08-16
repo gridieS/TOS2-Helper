@@ -60,7 +60,7 @@ class WindowInfo:
 
 class ScreenCoordinates():
     def __init__(self,WindowInstance: WindowInfo | list, alpha_position_x: float | int,alpha_position_y: float | int, add_x: int = 0, add_y: int = 0,) -> None:
-        self.x: int = int(WindowInstance.width/alpha_position_x) + WindowInstance.position_x
-        self.y: int = int(WindowInstance.height/alpha_position_y) + WindowInstance.position_y
+        self.x: int = int(WindowInstance.width/alpha_position_x) + WindowInstance.position_x + add_x
+        self.y: int = int(WindowInstance.height/alpha_position_y) + WindowInstance.position_y + add_y
         self.position: tuple = (self.x,self.y)
     
