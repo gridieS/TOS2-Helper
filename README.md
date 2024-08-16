@@ -50,24 +50,7 @@ Then, to run the program:
 ```
 # All Commands
 
-<!-- ACTION_STRING="`"
-STOP_PROGRAM_PREFIX="stop"
-RESTART_PROGRAM_PREFIX="restart"
-VOTE1_PREFIX="vote1 "
-VOTE2_PREFIX="vote2 "
-GUILTY_PREFIX="guilty"
-INNOCENT_PREFIX="inno"
-TERMINAL_WIDTH="278"
-TERMINAL_HEIGHT="411"
-TERMINAL_POSITION_X="850"
-TERMINAL_POSITION_Y="710"
-TOGGLE_MINIMIZED="toggle"
-MINIMIZE="hide"
-UNMINIMIZE="show"
-ABILITY="ability"
-FILTER_CHAT="filter "
-CLEAR_FILTER="clear" -->
-To perform all of the following commands, you have to set an action key ("`" by default) in the customizations.env file, then type your desired command and press the action key. (For example: guilty` will perform the guilty macro)
+To perform all of the following commands, you have to set an action key ("\`" by default) in the customizations.env file, then type your desired command and press the action key. (For example: guilty` will perform the guilty macro)
 
 All of the following commands and their keywords are customizable in the customizations.env file.
 
