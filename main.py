@@ -43,6 +43,13 @@ def decide_tos_vote_positions(current_windows_infos):
             button_dict["inno"] = ScreenCoordinates(windowInfo,1.66,1.52)
             button_dict["guilty"] = ScreenCoordinates(windowInfo,2.53,1.52) 
             button_dict["ability"] = ScreenCoordinates(windowInfo,1.17,4.86) 
+            button_dict["open_chat_filter"] = ScreenCoordinates(windowInfo,5.48,6.31)
+            button_dict["filter_only"] = ScreenCoordinates(windowInfo,11.85,5.09)
+            button_dict["open_chat"] = ScreenCoordinates(windowInfo,3.04,1.97)
+            button_dict["clear_chat"] = ScreenCoordinates(windowInfo,3.16,6.39)
+            chat_filter_margin = windowInfo.height/33.76
+            for i in range(1,TOS_TOWN_MEMBERS+1):
+                button_dict[f"chatlog{i}"] = ScreenCoordinates(windowInfo,5.59,5.29,add_y=i*chat_filter_margin)
 
     if result == False:
         print("Could not find TOS2 window.")
@@ -51,19 +58,25 @@ def move_mouse_to(pos_x:float | int,pos_y:float | int):
     MouseController.move(MouseController(),-3000,-3000)
     MouseController.move(MouseController(),pos_x,pos_y)
 
+def click_button(button_num: int):
+    if button_num == 1:
+        MouseController.click(MouseController(),pynput.mouse.Button.left)
+    if button_num == 2:
+        MouseController.click(MouseController(),pynput.mouse.Button.right)
+
 def show_all_members():
     move_mouse_to(*button_dict["show_all"].position)
-    MouseController.click(MouseController(),pynput.mouse.Button.left)
+    click_button(1)
 
 def show_alive_members():
     move_mouse_to(*button_dict["show_alive"].position)
-    MouseController.click(MouseController(),pynput.mouse.Button.left)
+    click_button(1)
 
 def vote1_tos(num):
     show_all_members()
     time.sleep(DELAY_TIME/3)
     move_mouse_to(*vote1_locations_dict[num])
-    MouseController.click(MouseController(),pynput.mouse.Button.left)
+    click_button(1)
     time.sleep(DELAY_TIME/3)
     show_alive_members()
 
@@ -71,7 +84,7 @@ def vote2_tos(num):
     show_all_members()
     time.sleep(DELAY_TIME/3)
     move_mouse_to(*vote2_locations_dict[num])
-    MouseController.click(MouseController(),pynput.mouse.Button.left)
+    click_button(1)
     time.sleep(DELAY_TIME/3)
     show_alive_members()
 
@@ -80,12 +93,31 @@ def decide_verdict_tos(verdict: bool):
         move_mouse_to(*button_dict["guilty"].position)
     elif verdict == False:
         move_mouse_to(*button_dict["inno"].position)
-    MouseController.click(MouseController(),pynput.mouse.Button.left)
+    click_button(1)
 
 def click_ability():
     move_mouse_to(*button_dict["ability"].position)
-    MouseController.click(MouseController(),pynput.mouse.Button.left)
+    click_button(1)
 
+def filter_chat_by_number(num: int):
+    move_mouse_to(*button_dict["open_chat"].position)
+    click_button(1)
+    time.sleep(DELAY_TIME)
+    clear_chat_filter()
+    time.sleep(DELAY_TIME)
+    move_mouse_to(*button_dict["open_chat_filter"].position)
+    click_button(1)
+    time.sleep(DELAY_TIME)
+    move_mouse_to(*button_dict[f"chatlog{num}"].position)
+    click_button(1)
+    time.sleep(DELAY_TIME)
+    move_mouse_to(*button_dict["filter_only"].position)
+    click_button(1)
+
+def clear_chat_filter():
+    move_mouse_to(*button_dict["clear_chat"].position)
+    click_button(1)
+    
 def stop_program():
     print("Stopping program..")
     close_notepad(get_current_windows_infos())
@@ -138,12 +170,14 @@ word_to_function = {
     os.environ["TOGGLE_MINIMIZED"]: {"func": toggle_notepad_minimized,"args": []},
     os.environ["MINIMIZE"]: {"func": toggle_notepad_minimized,"args": [True]},
     os.environ["UNMINIMIZE"]: {"func": toggle_notepad_minimized,"args": [False]},
-    os.environ["ABILITY"]: {"func": click_ability,"args": []}
+    os.environ["ABILITY"]: {"func": click_ability,"args": []},
+    os.environ["CLEAR_FILTER"]: {"func": clear_chat_filter,"args": []}
 }
 
 for i in range(1,TOS_TOWN_MEMBERS+1): #keep this
     word_to_function[f"{os.environ["VOTE1_PREFIX"]}{i}"] = {"func": vote1_tos,"args": [i]} 
     word_to_function[f"{os.environ["VOTE2_PREFIX"]}{i}"] = {"func": vote2_tos,"args": [i]}  
+    word_to_function[f"{os.environ["FILTER_CHAT"]}{i}"] = {"func": filter_chat_by_number,"args": [i]}  
 
 word_cached = ""
 MAX_WORD_CACHED_LENGTH = 15
