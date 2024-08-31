@@ -11,6 +11,16 @@ load_dotenv("customizations.env")
 
 TOS_TOWN_MEMBERS = 15
 TOS_NOTEPAD_WINDOW_NAME = "TOS-Notepad"
+TERMINAL_NAME : str = None
+match os.environ["TERMINAL"]:
+    case "wezterm":
+        TERMINAL_NAME = "wezterm"
+    case "gnome-terminal":
+        TERMINAL_NAME = "Terminal"
+TERMINAL_COMMAND_FOR_NAME : dict[str,str]= {
+    "wezterm" : f'flatpak run org.wezfurlong.wezterm cli spawn --new-window --cwd {os.path.dirname(os.path.abspath(__file__))} -- bash -c " vim assets/temp_tos.txt ; sleep 86400"',
+    "gnome-terminal" : "gnome-terminal -e 'vim assets/temp_tos.txt'"
+}
 ACTION_STRING = os.environ["ACTION_STRING"]
 TERMINAL_POSITION = [os.environ["TERMINAL_POSITION_X"],os.environ["TERMINAL_POSITION_Y"],os.environ["TERMINAL_WIDTH"],os.environ["TERMINAL_HEIGHT"]]
 vote1_locations_dict = {}
@@ -18,6 +28,7 @@ vote2_locations_dict = {}
 button_dict = {}
 notepad_hidden: bool= False
 MouseController = pynput.mouse.Controller
+
 
 def get_current_windows_infos() -> list[WindowInfo]:
     command_stdout = subprocess.run(["wmctrl", "-lG"],capture_output=True)
@@ -126,12 +137,12 @@ def stop_program():
 def open_tos_notepad():
     global notepad_hidden
     subprocess.run(split("cp assets/tos_template.txt assets/temp_tos.txt"))
-    subprocess.run(split("gnome-terminal -e 'vim assets/temp_tos.txt'"))
+    subprocess.run(split(TERMINAL_COMMAND_FOR_NAME[TERMINAL_NAME]))
     notepad_hidden = False
 
 def modify_notepad_window(current_windows_infos: list[WindowInfo]):
     for WindowInstance in current_windows_infos:
-        if WindowInstance.window_name == "Terminal":
+        if WindowInstance.window_name == TERMINAL_NAME:
             WindowInstance.change_window_name(TOS_NOTEPAD_WINDOW_NAME)
             WindowInstance.change_window_dimensions(*TERMINAL_POSITION)
             WindowInstance.toggle_always_on_top(True)
