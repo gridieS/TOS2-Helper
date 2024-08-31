@@ -18,7 +18,7 @@ match os.environ["TERMINAL"]:
     case "gnome-terminal":
         TERMINAL_NAME = "Terminal"
 TERMINAL_COMMAND_FOR_NAME : dict[str,str]= {
-    "wezterm" : f'flatpak run org.wezfurlong.wezterm cli spawn --new-window --cwd {os.path.dirname(os.path.abspath(__file__))} -- bash -c " vim assets/temp_tos.txt ; sleep 86400"',
+    "wezterm" : f'flatpak run org.wezfurlong.wezterm cli spawn --new-window -- bash -c "cd {os.path.dirname(os.path.abspath(__file__))} ; vim assets/temp_tos.txt ; sleep 86400"',
     "gnome-terminal" : "gnome-terminal -e 'vim assets/temp_tos.txt'"
 }
 ACTION_STRING = os.environ["ACTION_STRING"]
